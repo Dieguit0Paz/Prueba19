@@ -15,16 +15,15 @@ RUN apt-get update && apt-get install -y \
     libsasl2-dev \
     libssl-dev \
     python3-dev \
-    google-auth \
     libffi-dev \
     libbz2-dev \
     wget \
     curl \
     unzip \
     node-less \
-    npm \
-    npm install -g less less-plugin-clean-css \
-    && apt-get clean
+    npm && \
+    npm install -g less less-plugin-clean-css && \
+    apt-get clean
 
 # Crear usuario odoo y carpetas necesarias
 RUN mkdir -p /opt/odoo/custom_addons /var/lib/odoo && \
@@ -49,6 +48,7 @@ RUN python -m venv venv && \
     pip install --upgrade pip && \
     pip install -r requirements.txt && \
     pip install pdfminer
+    pip install google-auth
 
 # Exponer puerto de Odoo
 EXPOSE 8069
