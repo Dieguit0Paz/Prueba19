@@ -49,7 +49,8 @@ RUN python -m venv venv && \
     pip install --upgrade pip && \
     pip install -r requirements.txt && \
     pip install pdfminer && \
-    pip install google-auth
+    pip install google-auth && \
+    ./odoo-bin -c odoo.conf -d fara -i base
 
 # Exponer puerto de Odoo
 EXPOSE 8069
