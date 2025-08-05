@@ -36,7 +36,7 @@ RUN mkdir -p /opt/odoo/custom_addons /var/lib/odoo && \
 WORKDIR /opt/odoo
 
 # Clonar repositorio del proyecto (esto crea /opt/odoo/app)
-RUN git clone https://github.com/Dieguit0Paz/Prueba18.git app
+RUN git clone https://github.com/Dieguit0Paz/Prueba19.git app
 
 # Copiar script de arranque (después de clonar el repo)
 COPY --chown=odoo:odoo entrypoint.sh /opt/odoo/app/entrypoint.sh
@@ -54,7 +54,7 @@ RUN python -m venv venv && \
 EXPOSE 8069
 
 # Volúmenes persistentes
-VOLUME ["/var/lib/odoo", "/opt/odoo/custom_addons"]
+VOLUME ["/var/lib/odoo", "/opt/odoo/app/custom_addons"]
 
 # Ejecutar script de arranque
 ENTRYPOINT ["/opt/odoo/app/entrypoint.sh"]
