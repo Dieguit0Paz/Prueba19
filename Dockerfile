@@ -44,17 +44,16 @@ RUN chmod +x /opt/odoo/app/entrypoint.sh
 
 # Crear entorno virtual e instalar dependencias
 WORKDIR /opt/odoo/app
-COPY --chown=odoo:odoo odoo.conf /opt/odoo/app/odoo.conf
-RUN chmod 644 /opt/odoo/app/odoo.conf
+COPY --chown=odoo:odoo rendered.conf /opt/odoo/app/rendered.conf
+RUN chmod 644 /opt/odoo/app/rendered.conf
 RUN python -m venv venv && \
     . venv/bin/activate && \
     pip install --upgrade pip && \
     pip install -r requirements.txt pdfminer google-auth
 
 USER odoo
-USER odoo
 RUN venv/bin/python /opt/odoo/app/odoo-bin \
-    -c /opt/odoo/app/odoo.conf -d fara -i base
+    -c /opt/odoo/app/rendered.conf -d fara -i base
 
 # Exponer puerto de Odoo
 EXPOSE 8069
