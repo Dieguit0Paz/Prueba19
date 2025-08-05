@@ -3,12 +3,10 @@ FROM python:3.12-slim
 
 # Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
-    python3.12-dev python3.12-venv \
-    gcc git node-less npm wkhtmltopdf \
-    libxml2-dev libxslt-dev libjpeg-dev \
-    libpq-dev libldap2-dev libsasl2-dev \
-    libssl-dev libffi-dev libbz2-dev wget curl unzip \
-    && apt-get clean
+    software-properties-common wget git gcc g++ \
+    libssl-dev libbz2-dev libffi-dev zlib1g-dev \
+    python3.12 python3.12-venv python3.12-dev npm node-less wget curl unzip wkhtmltopdf && \
+    apt-get clean
 
 # Crear usuario odoo y carpetas necesarias
 RUN mkdir -p /opt/odoo/custom_addons /var/lib/odoo && \
