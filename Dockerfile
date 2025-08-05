@@ -1,29 +1,14 @@
 # Imagen base
-FROM python:3.10-slim
+FROM python:3.12-slim
 
 # Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
-    git \
-    wkhtmltopdf \
-    gcc \
-    g++ \
-    libxml2-dev \
-    libxslt-dev \
-    libjpeg-dev \
-    libpq-dev \
-    libldap2-dev \
-    libsasl2-dev \
-    libssl-dev \
-    python3-dev \
-    libffi-dev \
-    libbz2-dev \
-    wget \
-    curl \
-    unzip \
-    node-less \
-    npm && \
-    npm install -g less less-plugin-clean-css && \
-    apt-get clean
+    python3.12-dev python3.12-venv \
+    gcc git node-less npm wkhtmltopdf \
+    libxml2-dev libxslt-dev libjpeg-dev \
+    libpq-dev libldap2-dev libsasl2-dev \
+    libssl-dev libffi-dev libbz2-dev wget curl unzip \
+    && apt-get clean
 
 # Crear usuario odoo y carpetas necesarias
 RUN mkdir -p /opt/odoo/custom_addons /var/lib/odoo && \
@@ -43,12 +28,9 @@ RUN chmod +x /opt/odoo/app/entrypoint.sh
 
 # Crear entorno virtual e instalar dependencias
 WORKDIR /opt/odoo/app
-RUN python -m venv venv && \
-    . venv/bin/activate && \
-    pip install --upgrade pip && \
-    pip install -r requirements.txt && \
-    pip install pdfminer && \
-    pip install google-auth
+RUN python3.12 -m venv venv && \
+    /opt/odoo/app/venv/bin/pip install --upgrade pip && \    
+    /opt/odoo/app/venv/bin/pip install -r requirements.txt
 
 # Exponer puerto de Odoo
 EXPOSE 8069
