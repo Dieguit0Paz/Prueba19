@@ -2,12 +2,13 @@
 FROM python:3.12-slim-bookworm
 
 # Instalar dependencias del sistema
-RUN apt-get update && apt-get install -y wget gnupg2 build-essential zlib1g-dev libssl-dev libbz2-dev libffi-dev libreadline-dev && \
-    wget -qO- https://pascalroeleven.nl/deb-pascalroeleven.gpg \
-    | tee /etc/apt/keyrings/pascal-backport.gpg && \
-    echo "deb [signed-by=/etc/apt/keyrings/pascal-backport.gpg] http://deb.pascalroeleven.nl/python3.12 bookworm-backports main" \
-    > /etc/apt/sources.list.d/python3.12-backport.list && \
-    apt-get update && apt-get install -y python3.12 python3.12-venv python3.12-dev wget gitnpm node-less wkhtmltopdf libxml2-dev libxslt-dev libjpeg-dev libpq-dev libldap2-dev libsasl2-dev libssl-dev && \
+RUN apt-get update && apt-get install -y build-essential libssl-dev libbz2-dev libffi-dev libreadline-dev zlib1g-dev wget curl && \
+    wget https://www.python.org/ftp/python/3.12.5/Python-3.12.5.tgz && \
+    tar xzf Python-3.12.5.tgz && cd Python-3.12.5 && \
+    ./configure --enable-optimizations && \
+    make -j$(nproc) && \
+    make altinstall && cd .. && \
+    rm -rf Python-3.12.5* && \
     apt-get clean
 
 RUN npm install -g less less-plugin-clean-css
@@ -31,7 +32,8 @@ RUN chmod +x /opt/odoo/app/entrypoint.sh
 # Crear entorno virtual e instalar dependencias
 WORKDIR /opt/odoo/app
 RUN python3.12 -m venv venv && \
-    /opt/odoo/app/venv/bin/pip install --upgrade pip && \    
+    /opt/odoo/app/venv/bin/pip install --upgrade pip && \
+    /opt/odoo/app/venv/bin/pip install gevent==24.2.1 greenlet>=3.0 && \
     /opt/odoo/app/venv/bin/pip install -r requirements.txt
 
 # Exponer puerto de Odoo
