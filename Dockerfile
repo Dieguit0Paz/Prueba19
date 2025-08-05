@@ -2,13 +2,12 @@
 FROM python:3.12-slim-bookworm
 
 # Instalar dependencias del sistema
-RUN apt-get update && apt-get install -y build-essential libssl-dev libbz2-dev libffi-dev libreadline-dev zlib1g-dev wget curl && \
-    wget https://www.python.org/ftp/python/3.12.5/Python-3.12.5.tgz && \
-    tar xzf Python-3.12.5.tgz && cd Python-3.12.5 && \
-    ./configure --enable-optimizations && \
-    make -j$(nproc) && \
-    make altinstall && cd .. && \
-    rm -rf Python-3.12.5* && \
+RUN wget -qO- https://pascalroeleven.nl/deb-pascalroeleven.gpg \
+     | tee /etc/apt/keyrings/pascal-backport.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/pascal-backport.gpg] http://deb.pascalroeleven.nl/python3.12 bookworm-backports main" \
+      > /etc/apt/sources.list.d/python3.12-backport.list && \
+    apt-get update && \
+    apt-get install -y python3.12 python3.12-venv python3.12-dev wget git node-less npm wkhtmltopdf libxml2-dev libxslt-dev libjpeg-dev libpq-dev libldap2-dev libsasl2-dev libssl-dev libffi-dev libbz2-dev unzip && \
     apt-get clean
 
 RUN npm install -g less less-plugin-clean-css
