@@ -1,12 +1,16 @@
 # Imagen base
-FROM python:3.12-slim
+FROM python:3.12-slim-bookworm
 
 # Instalar dependencias del sistema
-RUN apt-get update && apt-get install -y \
-    software-properties-common wget git gcc g++ \
-    libssl-dev libbz2-dev libffi-dev zlib1g-dev \
-    python3.12 python3.12-venv python3.12-dev npm node-less wget curl unzip wkhtmltopdf && \
+RUN apt-get update && apt-get install -y wget gnupg2 build-essential zlib1g-dev libssl-dev libbz2-dev libffi-dev libreadline-dev && \
+    wget -qO- https://pascalroeleven.nl/deb-pascalroeleven.gpg \
+    | tee /etc/apt/keyrings/pascal-backport.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/pascal-backport.gpg] http://deb.pascalroeleven.nl/python3.12 bookworm-backports main" \
+    > /etc/apt/sources.list.d/python3.12-backport.list && \
+    apt-get update && apt-get install -y python3.12 python3.12-venv python3.12-dev wget gitnpm node-less wkhtmltopdf libxml2-dev libxslt-dev libjpeg-dev libpq-dev libldap2-dev libsasl2-dev libssl-dev && \
     apt-get clean
+
+RUN npm install -g less less-plugin-clean-css
 
 # Crear usuario odoo y carpetas necesarias
 RUN mkdir -p /opt/odoo/custom_addons /var/lib/odoo && \
