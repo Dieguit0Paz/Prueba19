@@ -1,16 +1,30 @@
 # Imagen base
-FROM python:3.12-slim-bookworm
+FROM python:3.10-slim
 
 # Instalar dependencias del sistema
-RUN wget -qO- https://pascalroeleven.nl/deb-pascalroeleven.gpg \
-     | tee /etc/apt/keyrings/pascal-backport.gpg && \
-    echo "deb [signed-by=/etc/apt/keyrings/pascal-backport.gpg] http://deb.pascalroeleven.nl/python3.12 bookworm-backports main" \
-      > /etc/apt/sources.list.d/python3.12-backport.list && \
-    apt-get update && \
-    apt-get install -y python3.12 python3.12-venv python3.12-dev wget git node-less npm wkhtmltopdf libxml2-dev libxslt-dev libjpeg-dev libpq-dev libldap2-dev libsasl2-dev libssl-dev libffi-dev libbz2-dev unzip && \
+RUN apt-get update && apt-get install -y \
+    git \
+    wkhtmltopdf \
+    gcc \
+    g++ \
+    libxml2-dev \
+    libxslt-dev \
+    libjpeg-dev \
+    libpq-dev \
+    libldap2-dev \
+    libsasl2-dev \
+    libssl-dev \
+    python3-dev \
+    libffi-dev \
+    libbz2-dev \
+    wget \
+    curl \
+    unzip \
+    node-less \
+    cython3 \
+    npm && \
+    npm install -g less less-plugin-clean-css && \
     apt-get clean
-
-RUN npm install -g less less-plugin-clean-css
 
 # Crear usuario odoo y carpetas necesarias
 RUN mkdir -p /opt/odoo/custom_addons /var/lib/odoo && \
@@ -30,10 +44,12 @@ RUN chmod +x /opt/odoo/app/entrypoint.sh
 
 # Crear entorno virtual e instalar dependencias
 WORKDIR /opt/odoo/app
-RUN python3.12 -m venv venv && \
-    /opt/odoo/app/venv/bin/pip install --upgrade pip && \
-    /opt/odoo/app/venv/bin/pip install gevent==24.2.1 greenlet>=3.0 && \
-    /opt/odoo/app/venv/bin/pip install -r requirements.txt
+RUN python -m venv venv && \
+    . venv/bin/activate && \
+    pip install --upgrade pip && \
+    pip install -r requirements.txt && \
+    pip install pdfminer && \
+    pip install google-auth
 
 # Exponer puerto de Odoo
 EXPOSE 8069
