@@ -1,25 +1,28 @@
 #!/bin/bash
+set -e
 
 # Activar entorno virtual
 source /opt/odoo/app/venv/bin/activate
 
-# Generar archivo de configuración si no existe
-if [ ! -f /opt/odoo/app/odoo.conf ]; then
-  cat > /opt/odoo/app/odoo.conf <<EOF
-[options]
-addons_path = ${ADDONS_PATH}
-admin_passwd = ${ADMIN_PASSWORD}
-db_host = ${DB_HOST}
-db_port = ${DB_PORT}
-db_user = ${DB_USER}
-db_password = ${DB_PASSWORD}
-log_level = info
-web.base.url = ${WEBBASEURL}
-database.expiration_date = ${DATABASEEXPIRATION_DATE}
-data_dir = ${ODOO_DATA_DIR}
-proxy_mode = ${PROXY_MODE}
-EOF
+# Asegurar que DB_PORT tenga un valor numérico
+export DB_PORT="${DB_PORT:-5432}"
+
+# Renderizar el archivo de configuración con variables de entorno
+envsubst < /opt/odoo/app/odoo.conf > /opt/odoo/app/rendered.conf
+
+# Esperar a que el servicio PostgreSQL esté disponible
+echo "Esperando que PostgreSQL esté activo en ${DB_HOST}:${DB_PORT}..."
+until pg_isready -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" > /dev/null 2>&1; do
+  sleep 1
+done
+
+# Si la base de datos no existe, inicializarla con módulo base
+if ! venv/bin/python /opt/odoo/app/odoo-bin \
+     -c /opt/odoo/app/rendered.conf --list-db | grep -qw "${DB_NAME:-fara}"; then
+  echo "Base ${DB_NAME:-fara} no existe. Iniciando con -i base..."
+  venv/bin/python /opt/odoo/app/odoo-bin \
+    -c /opt/odoo/app/rendered.conf -d "${DB_NAME:-fara}" -i base
 fi
 
-# Ejecutar Odoo usando el archivo de configuración
-exec python /opt/odoo/app/odoo-bin -c /opt/odoo/app/odoo.conf
+# Iniciar Odoo normalmente (sin reinstalar base)
+exec venv/bin/python /opt/odoo/app/odoo-bin -c /opt/odoo/app/rendered.conf "$@"
