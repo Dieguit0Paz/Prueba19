@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
     python3-dev \
     libffi-dev \
     libbz2-dev \
+    postgresql-client \
     wget \
     curl \
     unzip \
