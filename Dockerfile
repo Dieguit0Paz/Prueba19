@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     node-less \
     cython3 \
-    gettext-base && \
+    gettext-base \
     npm && \
     npm install -g less less-plugin-clean-css && \
     apt-get clean
