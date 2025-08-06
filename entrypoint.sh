@@ -10,15 +10,15 @@ until pg_isready -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" > /dev/null 2>&
   sleep 1
 done
 
-echo "Listado de bases (psql):"
-PGPASSWORD="${DB_PASSWORD}" psql -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" -l
-
-if ! PGPASSWORD="${DB_PASSWORD}" psql -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" -lqt \
-     | cut -d '|' -f1 | grep -qw "${DB_NAME:-fara}"; then
-  echo "La base ${DB_NAME:-fara} no existe. Creando con -i base..."
+echo "Chequeando existencia de la base con SQL directo..."
+EXISTS=$(PGPASSWORD="${DB_PASSWORD}" psql -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" \
+  -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname = '${DB_NAME:-fara}'")
+if [ "$EXISTS" != "1" ]; then
+  echo "La base ${DB_NAME:-fara} no existe. Creando e instalando módulo base..."
   venv/bin/python /opt/odoo/app/odoo-bin \
     -c /opt/odoo/app/rendered.conf -d "${DB_NAME:-fara}" -i base
 fi
+
 
 echo "Iniciando Odoo..."
 exec venv/bin/python /opt/odoo/app/odoo-bin -c /opt/odoo/app/rendered.conf "$@"
