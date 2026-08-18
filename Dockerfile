@@ -1,6 +1,5 @@
 # Imagen base
 FROM python:3.10-slim
-
 # Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
     git \
@@ -11,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     libxslt-dev \
     libjpeg-dev \
     libpq-dev \
-    libldap2-dev \
+    libldap-dev \
     libsasl2-dev \
     libssl-dev \
     python3-dev \
@@ -21,13 +20,10 @@ RUN apt-get update && apt-get install -y \
     wget \
     curl \
     unzip \
-    node-less \
-    cython3 \
     gettext-base \
     npm && \
     npm install -g less less-plugin-clean-css && \
-    apt-get clean
-
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 # Crear usuario odoo y carpetas necesarias
 RUN mkdir -p /opt/odoo/custom_addons /var/lib/odoo && \
     useradd -m -d /opt/odoo -U -r -s /bin/bash odoo && \
