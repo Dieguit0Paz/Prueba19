@@ -54,7 +54,7 @@ RUN chmod +x /opt/odoo/app/entrypoint.sh
 # Crear entorno virtual e instalar dependencias
 RUN python -m venv venv && \
     . venv/bin/activate && \
-    pip install --upgrade pip && \
+    pip install --upgrade pip "setuptools<70" wheel && \
     pip install -r requirements.txt pdfminer.six google-auth
 
 # Exponer puerto de Odoo
