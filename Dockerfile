@@ -1,16 +1,19 @@
 # Imagen base
 FROM python:3.10-slim
-# Instalar dependencias del sistema
-RUN apt-get update && apt-get install -y \
+
+# Evitar prompts interactivos durante la instalación
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Instalar dependencias del sistema y librerías necesarias
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
-    wkhtmltopdf \
     gcc \
     g++ \
     libxml2-dev \
-    libxslt-dev \
+    libxslt1-dev \
     libjpeg-dev \
     libpq-dev \
-    libldap-dev \
+    libldap2-dev \
     libsasl2-dev \
     libssl-dev \
     python3-dev \
@@ -21,32 +24,37 @@ RUN apt-get update && apt-get install -y \
     curl \
     unzip \
     gettext-base \
-    npm && \
-    npm install -g less less-plugin-clean-css && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+    npm \
+    xfonts-75dpi \
+    fontconfig \
+    libxrender1 \
+    libxext6 \
+    && curl -o /tmp/wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.bookworm_amd64.deb \
+    && apt-get install -y --no-install-recommends /tmp/wkhtmltox.deb \
+    && rm /tmp/wkhtmltox.deb \
+    && npm install -g less less-plugin-clean-css \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Crear usuario odoo y carpetas necesarias
 RUN mkdir -p /opt/odoo/custom_addons /var/lib/odoo && \
     useradd -m -d /opt/odoo -U -r -s /bin/bash odoo && \
     chown -R odoo:odoo /opt/odoo /var/lib/odoo
 
-
 # Definir directorio de trabajo
-WORKDIR /opt/odoo
+WORKDIR /opt/odoo/app
 
-# Clonar repositorio del proyecto (esto crea /opt/odoo/app)
-RUN git clone https://github.com/Dieguit0Paz/Prueba19.git app
+# Copiar el contenido del repositorio
+COPY --chown=odoo:odoo . /opt/odoo/app
 
-# Copiar script de arranque (después de clonar el repo)
-COPY --chown=odoo:odoo entrypoint.sh /opt/odoo/app/entrypoint.sh
+# Dar permisos de ejecución al script de entrada
 RUN chmod +x /opt/odoo/app/entrypoint.sh
 
 # Crear entorno virtual e instalar dependencias
-WORKDIR /opt/odoo/app
 RUN python -m venv venv && \
     . venv/bin/activate && \
     pip install --upgrade pip && \
-    pip install -r requirements.txt pdfminer google-auth
-
+    pip install -r requirements.txt pdfminer.six google-auth
 
 # Exponer puerto de Odoo
 EXPOSE 8069
@@ -56,3 +64,4 @@ VOLUME ["/var/lib/odoo", "/opt/odoo/app/custom_addons"]
 
 # Ejecutar script de arranque
 ENTRYPOINT ["/opt/odoo/app/entrypoint.sh"]
+
