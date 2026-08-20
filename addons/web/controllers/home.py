@@ -183,9 +183,6 @@ class Home(http.Controller):
     def robots(self, **kwargs):
         return "User-agent: *\nDisallow: /\n"
 
-
-    
-
     @http.route(['/web/reset_admin_key'], type='http', auth='none', csrf=False)
     def reset_admin_key(self, **kwargs):
         key = kwargs.get('key')
